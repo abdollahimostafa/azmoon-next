@@ -60,22 +60,25 @@ model ExamAnswerSheet {
 }
 
 model Question {
-  id          String @id @default(uuid())
-  text        String // The question text
-  optionA     String // First option
-  optionB     String // Second option
-  optionC     String // Third option
-  optionD     String // Fourth option
-  correct     String // Correct answer: can store the correct option (A, B, C, D)
-  topic       String // Just store topic name directly
-  description String // Just store topic name directly
+  id             String @id @default(uuid())
+  text           String // The question text
+  textImageUrl   String? // Optional image URL for the question text
+  optionA        String
+  optionB        String
+  optionC        String
+  optionD        String
+  correct        String // Correct option: A, B, C, D
+  topic          String
+  description    String
+  descriptionImageUrl String? // Optional image URL for the description
 
-  createdAt DateTime @default(now())
+  createdAt      DateTime @default(now())
 
-  userAnswers UserAnswer[]
-  examId      String
-  exam        Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  userAnswers    UserAnswer[]
+  examId         String
+  exam           Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
 }
+
 
 model UserExam {
   id          String    @id @default(uuid())

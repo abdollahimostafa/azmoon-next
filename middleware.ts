@@ -15,12 +15,16 @@ export async function middleware(req: NextRequest) {
     const allowedPhone = "09102942780"
     const allowedPhone2 ="09144229509"
     const allowedPhone3 ="09217431568"
+    const allowedPhone4 ="09300377923"
+
 
      // keep admin phone in .env for safety
     if (
       token?.phoneNumber !== allowedPhone &&
       token?.phoneNumber !== allowedPhone2 &&
-      token?.phoneNumber !== allowedPhone3
+      token?.phoneNumber !== allowedPhone3 &&
+      token?.phoneNumber !== allowedPhone4 
+
 
     ) {
             return NextResponse.redirect(new URL("/404", req.url)) // or /dashboard

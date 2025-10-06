@@ -6,6 +6,9 @@ type QuestionBody = {
   options: string[]
   correct: string
   description: string
+  textImageUrl?: string
+  descriptionImageUrl?: string
+
 }
 
 type TopicBody = {
@@ -71,6 +74,8 @@ export async function POST(
         optionD: q.options[3] ?? "",
         correct: q.correct,
         description: q.description,
+        textImageUrl: q.textImageUrl ?? null,
+        descriptionImageUrl: q.descriptionImageUrl ?? null,
       }))
     )
 

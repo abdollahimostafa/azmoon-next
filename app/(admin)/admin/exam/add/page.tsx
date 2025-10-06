@@ -22,6 +22,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
+import Image from "next/image"
 
 type FormState = {
   name: string
@@ -37,14 +38,17 @@ type FormState = {
 
 type Question = {
   text: string
+  textImageUrl?: string
   optionA: string
   optionB: string
   optionC: string
   optionD: string
   correct: string
   description: string
-
+  descriptionImageUrl?: string
 }
+
+
 const FIXED_TOPICS = [
   "ریه",
   "رادیولوژی",
@@ -84,6 +88,7 @@ type Topic = {
 export default function CreateExamPage() {
   const router = useRouter()
     const [loading, setLoading] = useState(false)
+const [previewImage, setPreviewImage] = useState<string | null>(null)
 
 const [form, setForm] = useState<FormState>({
   name: "",
@@ -175,12 +180,14 @@ const [form, setForm] = useState<FormState>({
           name: topic.name,
           questions: topic.questions.map((q) => ({
             text: q.text,
+              textImageUrl: q.textImageUrl || null,
             optionA: q.optionA,
             optionB: q.optionB,
             optionC: q.optionC,
             optionD: q.optionD,
             correct: q.correct,
-            description: q.description,  // ← send description to backend
+            description: q.description,
+              descriptionImageUrl: q.descriptionImageUrl || null,  // ← send description to backend
           })),
         })),
       }
@@ -202,7 +209,25 @@ const [form, setForm] = useState<FormState>({
   }
 
   return (
+    
     <div className="p-6 space-y-6 rtl text-right">
+      {previewImage && (
+  <div
+    className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
+    onClick={() => setPreviewImage(null)}
+  >
+    <div className="relative bg-white rounded p-2 max-w-[90%] max-h-[90%]">
+      <Image width={500} height={500} src={previewImage} alt="Preview" className="max-w-full max-h-full rounded" />
+      <button
+        className="absolute top-2 right-2 text-white bg-gray-800 rounded-full p-1"
+        onClick={() => setPreviewImage(null)}
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+)}
+
       <h1 className="text-2xl font-bold">ایجاد آزمون جدید</h1>
 
       {/* --- Exam Details --- */}
@@ -306,12 +331,44 @@ const [form, setForm] = useState<FormState>({
                   <Label>سوال {qIndex + 1}</Label>
                   <Button variant="destructive" size="sm" onClick={() => removeQuestion(tIndex, qIndex)}>حذف سوال</Button>
                 </div>
+                                  <Label>تصویر سوال</Label>
+
+{q.textImageUrl && (
+<Image width={500} height={500}
+    src={q.textImageUrl}
+    alt="Question Image"
+    className="max-h-24 mt-2 cursor-pointer border rounded"
+    onClick={() => setPreviewImage(q.textImageUrl!)}
+  />
+)}                                                  <Label>تصویر پاسخ</Label>
+
+{q.descriptionImageUrl && (
+<Image width={500} height={500}
+    src={q.descriptionImageUrl}
+    alt="Description Image"
+    className="max-h-24 mt-2 cursor-pointer border rounded"
+    onClick={() => setPreviewImage(q.descriptionImageUrl!)}
+  />
+)}
                 <Input placeholder="متن سوال" value={q.text} onChange={(e) => updateQuestion(tIndex, qIndex, "text", e.target.value)} />
                 <Input placeholder="گزینه A" value={q.optionA} onChange={(e) => updateQuestion(tIndex, qIndex, "optionA", e.target.value)} />
                 <Input placeholder="گزینه B" value={q.optionB} onChange={(e) => updateQuestion(tIndex, qIndex, "optionB", e.target.value)} />
                 <Input placeholder="گزینه C" value={q.optionC} onChange={(e) => updateQuestion(tIndex, qIndex, "optionC", e.target.value)} />
                 <Input placeholder="گزینه D" value={q.optionD} onChange={(e) => updateQuestion(tIndex, qIndex, "optionD", e.target.value)} />
+                <Input
+  placeholder="لینک تصویر متن سوال (اختیاری)"
+  value={q.textImageUrl || ""}
+  onChange={(e) => updateQuestion(tIndex, qIndex, "textImageUrl", e.target.value)}
+/>
+
+
                  <Textarea placeholder="توضیحات سوال" value={q.description} onChange={(e) => updateQuestion(tIndex, qIndex, "description", e.target.value)} />
+                  <Input
+  placeholder="لینک تصویر توضیحات سوال (اختیاری)"
+  value={q.descriptionImageUrl || ""}
+  onChange={(e) => updateQuestion(tIndex, qIndex, "descriptionImageUrl", e.target.value)}
+/>
+
                 <Select value={q.correct} onValueChange={(val) => updateQuestion(tIndex, qIndex, "correct", val)}>
                   <SelectTrigger><SelectValue placeholder="گزینه صحیح" /></SelectTrigger>
                   <SelectContent>

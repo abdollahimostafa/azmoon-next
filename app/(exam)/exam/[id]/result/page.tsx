@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 type Question = {
   id: string
@@ -12,6 +13,9 @@ type Question = {
   correct: string   // ✅ new field
   topic: string
   description: string
+  textImageUrl?: string
+  descriptionImageUrl?: string
+
 }
 
 type ExamData = {
@@ -29,6 +33,7 @@ export default function ExamPage({ params }: { params: Promise<{ id: string }> }
 const [submitting] = useState<{ [key: string]: boolean }>({})
   const [submitted, setSubmitted] = useState<{ [key: string]: boolean }>({})
   const router = useRouter()
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
 
   useEffect(() => {
   async function fetchExam() {
@@ -74,6 +79,22 @@ const scorePercent = Math.round((correctCount / totalQuestions) * 100)
 
   return (
     <div className="p-6 space-y-6">
+                  {previewImage && (
+  <div
+    className="fixed inset-0 bg-black/50 flex justify-center  items-center z-50"
+    onClick={() => setPreviewImage(null)}
+  >
+    <div className="relative bg-white rounded p-2 max-w-[80%] lg:max-w-[50%] max-h-[90%]">
+     <Image width={500} height={500}src={previewImage} alt="Preview" className="max-w-full max-h-full rounded" />
+      <button
+        className="absolute top-2 right-2 text-white bg-gray-800 rounded-full p-1"
+        onClick={() => setPreviewImage(null)}
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+)}
       {/* Header */}
       <div className="flex items-center justify-between border-b pb-4">
         <div className="flex items-center gap-2">
@@ -182,6 +203,13 @@ const scorePercent = Math.round((correctCount / totalQuestions) * 100)
     </span>{" "}
     {q.text}
   </p>
+   {q.textImageUrl && (
+<Image width={500} height={500}      src={q.textImageUrl}
+      alt="تصویر سوال"
+      className="mt-2 w-40 h-40 object-contain border rounded cursor-pointer hover:scale-105 transition-transform"
+      onClick={() => setPreviewImage(q.textImageUrl!)}
+    />
+  )}
   <div className="space-y-2">
     {q.options.map((opt, i) => (
       <label
@@ -201,8 +229,6 @@ const scorePercent = Math.round((correctCount / totalQuestions) * 100)
     ))}
   </div>
 
-  {/* ✅ Correct Answer */}
-{/* ✅ Correct Answer */}
 
 
 {/* ✅ Question Description */}
@@ -220,10 +246,20 @@ const scorePercent = Math.round((correctCount / totalQuestions) * 100)
     توضیح سوال و راهنما:  
   </p>
       <hr className="my-2 border-gray-300" />
-    {q.description}
 
+<p className="text-sm leading-relaxed text-gray-800 whitespace-pre-line">
+  {q.description}
+</p>
+{q.descriptionImageUrl && (
+<Image width={500} height={500}           src={q.descriptionImageUrl}
+          alt="تصویر توضیح"
+          className="mt-3 w-40 h-40 object-contain border rounded cursor-pointer hover:scale-105 transition-transform"
+          onClick={() => setPreviewImage(q.descriptionImageUrl!)}
+        />
+      )}
 </div>
 )}
+
 
 </CardContent>
                     

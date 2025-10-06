@@ -103,7 +103,7 @@ useEffect(() => {
 
           <button
             className="no-print p-2 rounded hover:bg-muted/50 transition"
-            onClick={() => router.push("/admin/dashboard")}
+            onClick={() => router.push("/admin/exam")}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>

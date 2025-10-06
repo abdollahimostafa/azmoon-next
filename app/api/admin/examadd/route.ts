@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 type QuestionInput = {
   text: string
   description?: string
+  textImageUrl?: string
+  descriptionImageUrl?: string
   optionA: string
   optionB: string
   optionC: string
@@ -57,7 +59,9 @@ export async function POST(req: Request) {
 const questionsToCreate = (topics as TopicInput[]).flatMap(topic =>
   topic.questions.map(q => ({
     text: q.text,
+    textImageUrl: q.textImageUrl ?? null,
     description: q.description ?? "",
+    descriptionImageUrl: q.descriptionImageUrl ?? null,
     optionA: q.optionA,
     optionB: q.optionB,
     optionC: q.optionC,

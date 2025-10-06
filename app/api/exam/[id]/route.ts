@@ -80,7 +80,10 @@ if (!reg) {
     options: [q.optionA, q.optionB, q.optionC, q.optionD],
     correct: q.correct,
     topic: q.topic,
-    description: q.description
+    description: q.description,
+    textImageUrl: q.textImageUrl ?? null,    
+    descriptionImageUrl: q.descriptionImageUrl ?? null,               // ✅ include text image
+           // ✅ include text image
   }))
 
   const userAnswers = registration.answers.map((a) => ({

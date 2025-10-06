@@ -3,6 +3,7 @@ import { useEffect, useState, use } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Loader2, X } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 type UserAnswer = {
   questionId: string
   answer: string
@@ -12,6 +13,8 @@ type Question = {
   text: string
   options: string[]
   topic: string
+  textImageUrl?: string | null
+  
 }
 
 type ExamData = {
@@ -25,6 +28,7 @@ type ExamData = {
 export default function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: examId } = use(params)
   const [exam, setExam] = useState<ExamData | null>(null)
+  
   const [timeLeft, setTimeLeft] = useState<number>(0)
   const [answers, setAnswers] = useState<{ [key: string]: string }>({})
   const [submitting, setSubmitting] = useState<{ [key: string]: boolean }>({})
@@ -33,6 +37,8 @@ export default function ExamPage({ params }: { params: Promise<{ id: string }> }
   const [markedred, setMarkedred] = useState<{ [key: string]: boolean }>({})
   const [showSummary, setShowSummary] = useState(false)
   const router = useRouter()
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
+
 
   // Fetch exam (same as your current logic)
   useEffect(() => {
@@ -114,6 +120,22 @@ const ua = data.exam.userAnswers?.find((a: UserAnswer) => a.questionId === q.id)
 
   return (
     <div className="p-6 space-y-6">
+            {previewImage && (
+  <div
+    className="fixed inset-0 bg-black/50 flex justify-center  items-center z-50"
+    onClick={() => setPreviewImage(null)}
+  >
+    <div className="relative bg-white rounded p-2 max-w-[80%] lg:max-w-[50%] max-h-[90%]">
+<Image width={500} height={500} src={previewImage} alt="Preview" className="max-w-full max-h-full rounded" />
+      <button
+        className="absolute top-2 right-2 text-white bg-gray-800 rounded-full p-1"
+        onClick={() => setPreviewImage(null)}
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+)}
       {/* Header */}
       <div className="sticky top-5 bg-white z-50 p-4 rounded-xl shadow-xl">
       <div className="flex items-center justify-between border-b pb-4">
@@ -189,6 +211,14 @@ const ua = data.exam.userAnswers?.find((a: UserAnswer) => a.questionId === q.id)
                   </div>
 
                   <p className="font-medium"><span className="bg-blue-300/30 p-1 w-8 h-8">{index + 1}.</span> {q.text}</p>
+{q.textImageUrl && (
+<Image width={500} height={500}    src={q.textImageUrl}
+    alt="تصویر متن سوال"
+    className="mt-2 w-40 h-40 object-contain border rounded cursor-pointer hover:scale-105 transition-transform"
+    onClick={() => setPreviewImage(q.textImageUrl!)} // ✅ open popup
+  />
+)}
+
                   <div className="space-y-2">
                     {["بدون پاسخ", ...q.options].map((opt, i) => (
                       <label key={i} className="flex items-center space-x-2 space-x-reverse cursor-pointer">
