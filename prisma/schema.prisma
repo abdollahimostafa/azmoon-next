@@ -1,0 +1,137 @@
+generator client {
+  provider      = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  firstName      String
+  lastName       String
+  melliCode      String   @unique
+  mdStatus       String // "intern" | "graduate"
+  phoneNumber    String   @unique
+  dateOfRegister DateTime @default(now())
+
+  exams      UserExam[] // Link to User's exams
+  examScores ExamScore[] // ← Add this back relation
+  Payment    Payment[]
+}
+
+model Code {
+  id        String   @id @default(uuid())
+  code      String
+  phone     String
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Exam {
+  id                String    @id @default(uuid())
+  name              String
+  description       String?
+  startDate         DateTime?
+  endDate           DateTime?
+  duration          Int
+  numberOfQuestions Int
+  status            String
+  price             Int?
+  createdAt         DateTime  @default(now())
+
+  questions    Question[] // ← Add this
+  userExams    UserExam[]
+  answerSheets ExamAnswerSheet[]
+  examScores   ExamScore[]
+  Payment      Payment[]
+}
+
+model ExamAnswerSheet {
+  id        String   @id @default(uuid())
+  examId    String
+  filename  String
+  url       String
+  createdAt DateTime @default(now())
+
+  exam Exam @relation(fields: [examId], references: [id])
+}
+
+model Question {
+  id          String @id @default(uuid())
+  text        String // The question text
+  optionA     String // First option
+  optionB     String // Second option
+  optionC     String // Third option
+  optionD     String // Fourth option
+  correct     String // Correct answer: can store the correct option (A, B, C, D)
+  topic       String // Just store topic name directly
+  description String // Just store topic name directly
+
+  createdAt DateTime @default(now())
+
+  userAnswers UserAnswer[]
+  examId      String
+  exam        Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+}
+
+model UserExam {
+  id          String    @id @default(uuid())
+  userId      String // Foreign key linking to the User
+  examId      String // Foreign key linking to the Exam
+  score       Int? // Store score of the user (optional)
+  startedAt   DateTime? // Timestamp when the user started the exam
+  completedAt DateTime? // Timestamp when the user completed the exam (can be null if not completed)
+  overtime    Boolean   @default(false) 
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam    Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers UserAnswer[] // User's answers to questions in this exam
+}
+
+model UserAnswer {
+  id         String   @id @default(uuid())
+  userExamId String // Foreign key linking to UserExam
+  questionId String // Foreign key linking to Question
+  answer     String // The selected answer (A, B, C, or D)
+  createdAt  DateTime @default(now())
+
+  userExam UserExam @relation(fields: [userExamId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id])
+}
+
+model ExamScore {
+  id         String   @id @default(uuid())
+  examId     String // Link to the exam
+  userId     String // Link to the user
+  score      Int // Raw score
+  percentage Float // Score percentage
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam       Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, userId], name: "exam_user_unique")
+}
+
+model Payment {
+  id           String   @id @default(uuid())
+  userId       String
+  examId       String
+  authority    String
+  amount       Int
+  status       String // "pending" | "success" | "failed"
+  refId        String? // Bank reference id after success
+  createdAt    DateTime @default(now())
+  overtime     Boolean   @default(false) 
+  discountCode String? // optional discount code
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam         Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+}
+
+model PriceOff {
+  id         String @id @default(uuid())
+  code       String @unique // The discount code
+  amount     Int // Discount amount in  percentage 
+  usageCount Int    @default(0) // How many times this code has been used
+  maxUsage   Int? // Optional max usage limit
+}
