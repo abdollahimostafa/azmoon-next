@@ -1,4 +1,3 @@
-// app/api/examlist/registerall/route.ts
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
@@ -24,12 +23,15 @@ export async function POST(req: Request) {
 
     // Fetch all exams
     const exams = await prisma.exam.findMany()
-    if (!exams.length) return NextResponse.json({ error: "No exams available", status: 404 })
+    if (!exams.length)
+      return NextResponse.json({ error: "No exams available", status: 404 })
 
     // Filter unregistered exams
     const unregisteredExams = []
     for (const exam of exams) {
-      const existing = await prisma.userExam.findFirst({ where: { examId: exam.id, userId } })
+      const existing = await prisma.userExam.findFirst({
+        where: { examId: exam.id, userId },
+      })
       if (!existing) unregisteredExams.push(exam)
     }
 
@@ -40,15 +42,37 @@ export async function POST(req: Request) {
     // Apply discount if exists
     let finalAmount = PACKAGE_PRICE
     let priceOffPercent = 0
+
     if (discountCode) {
-      const priceOff = await prisma.priceOff.findUnique({ where: { code: discountCode } })
+      const priceOff = await prisma.priceOff.findUnique({
+        where: { code: discountCode },
+      })
+
       if (priceOff) {
+        // ✅ Check suffix rule
+        const isPackageCode = discountCode.endsWith("oox")
+        if (!isPackageCode) {
+          return NextResponse.json(
+            {
+              error:
+                "این کد تخفیف مخصوص آزمون‌های تکی است و برای بسته قابل استفاده نیست.",
+            },
+            { status: 400 }
+          )
+        }
+
         priceOffPercent = priceOff.amount
         finalAmount = Math.floor(PACKAGE_PRICE * (1 - priceOff.amount / 100))
+
         await prisma.priceOff.update({
           where: { code: discountCode },
           data: { usageCount: { increment: 1 } },
         })
+      } else {
+        return NextResponse.json(
+          { error: "کد تخفیف نامعتبر است." },
+          { status: 400 }
+        )
       }
     }
 
@@ -59,7 +83,7 @@ export async function POST(req: Request) {
           data: {
             userId,
             examId: exam.id,
-            overtime: exam.status !== "closed", // 🔥 set overtime for each exam
+            overtime: exam.status !== "closed",
           },
         })
       }
@@ -89,7 +113,7 @@ export async function POST(req: Request) {
           authority: createTransaction.authority,
           amount: finalAmount,
           status: "pending",
-          overtime: exam.status !== "closed", // 🔥 carry overtime
+          overtime: exam.status !== "closed",
           discountCode: discountCode || null,
         },
       })

@@ -23,6 +23,7 @@ import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import Image from "next/image"
+import { ImageUploaderButton } from "@/components/ImageUploaderButton"
 
 type FormState = {
   name: string
@@ -355,19 +356,32 @@ const [form, setForm] = useState<FormState>({
                 <Input placeholder="گزینه B" value={q.optionB} onChange={(e) => updateQuestion(tIndex, qIndex, "optionB", e.target.value)} />
                 <Input placeholder="گزینه C" value={q.optionC} onChange={(e) => updateQuestion(tIndex, qIndex, "optionC", e.target.value)} />
                 <Input placeholder="گزینه D" value={q.optionD} onChange={(e) => updateQuestion(tIndex, qIndex, "optionD", e.target.value)} />
-                <Input
-  placeholder="لینک تصویر متن سوال (اختیاری)"
-  value={q.textImageUrl || ""}
-  onChange={(e) => updateQuestion(tIndex, qIndex, "textImageUrl", e.target.value)}
+<div className="flex gap-2 items-center">
+  <Input
+    placeholder="لینک تصویر متن سوال (اختیاری)"
+    value={q.textImageUrl || ""}
+    onChange={(e) => updateQuestion(tIndex, qIndex, "textImageUrl", e.target.value)}
+  />
+<ImageUploaderButton
+  onUpload={(url) => updateQuestion(tIndex, qIndex, "textImageUrl", url)}
 />
+</div>
+
+{/* --- Image URL input with uploader for description image --- */}
+<div className="flex gap-2 items-center">
+  <Input
+    placeholder="لینک تصویر توضیحات سوال (اختیاری)"
+    value={q.descriptionImageUrl || ""}
+    onChange={(e) => updateQuestion(tIndex, qIndex, "descriptionImageUrl", e.target.value)}
+  />
+<ImageUploaderButton
+  onUpload={(url) => updateQuestion(tIndex, qIndex, "descriptionImageUrl", url)}
+/>
+</div>
 
 
                  <Textarea placeholder="توضیحات سوال" value={q.description} onChange={(e) => updateQuestion(tIndex, qIndex, "description", e.target.value)} />
-                  <Input
-  placeholder="لینک تصویر توضیحات سوال (اختیاری)"
-  value={q.descriptionImageUrl || ""}
-  onChange={(e) => updateQuestion(tIndex, qIndex, "descriptionImageUrl", e.target.value)}
-/>
+
 
                 <Select value={q.correct} onValueChange={(val) => updateQuestion(tIndex, qIndex, "correct", val)}>
                   <SelectTrigger><SelectValue placeholder="گزینه صحیح" /></SelectTrigger>

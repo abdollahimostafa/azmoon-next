@@ -23,6 +23,7 @@ import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import Image from "next/image"
+import { ImageUploaderButton } from "@/components/ImageUploaderButton"
 type FetchedQuestion = {
   text: string
   optionA?: string
@@ -418,16 +419,28 @@ const updateQuestion = (
 </div>
                 ))}
                                 <Textarea placeholder="توضیحات سوال" value={q.description} onChange={(e) => updateQuestion(tIndex, qIndex, "description", e.target.value)} />
- <Input
-  placeholder="لینک تصویر متن سوال (اختیاری)"
-  value={q.textImageUrl || ""}
-  onChange={(e) => updateQuestion(tIndex, qIndex, "textImageUrl", e.target.value)}
+<div className="flex gap-2 items-center">
+  <Input
+    placeholder="لینک تصویر متن سوال (اختیاری)"
+    value={q.textImageUrl || ""}
+    onChange={(e) => updateQuestion(tIndex, qIndex, "textImageUrl", e.target.value)}
+  />
+<ImageUploaderButton
+  onUpload={(url) => updateQuestion(tIndex, qIndex, "textImageUrl", url)}
 />
-                  <Input
-  placeholder="لینک تصویر توضیحات سوال (اختیاری)"
-  value={q.descriptionImageUrl || ""}
-  onChange={(e) => updateQuestion(tIndex, qIndex, "descriptionImageUrl", e.target.value)}
+</div>
+
+{/* --- Image URL input with uploader for description image --- */}
+<div className="flex gap-2 items-center">
+  <Input
+    placeholder="لینک تصویر توضیحات سوال (اختیاری)"
+    value={q.descriptionImageUrl || ""}
+    onChange={(e) => updateQuestion(tIndex, qIndex, "descriptionImageUrl", e.target.value)}
+  />
+<ImageUploaderButton
+  onUpload={(url) => updateQuestion(tIndex, qIndex, "descriptionImageUrl", url)}
 />
+</div>
 
 
                 {/* Correct answer */}
