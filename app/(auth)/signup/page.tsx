@@ -30,7 +30,7 @@ export default function SignupPage() {
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
-    melliCode: '',
+    melliCode: '00000',
     phoneNumber: '',
     mdStatus: 'intern',
     code: '',
@@ -81,7 +81,7 @@ export default function SignupPage() {
   const handleVerify = async () => {
     setLoading(true)
     const normalizedPhone = normalizeNumbers(form.phoneNumber)
-    const normalizedMelli = normalizeNumbers(form.melliCode)
+    const normalizedMelli = "000000"
     const normalizedCode = normalizeNumbers(form.code)
 
     const result = await signIn('credentials', {
@@ -155,7 +155,7 @@ export default function SignupPage() {
                 <Input name="lastName" value={form.lastName} onChange={handleChange} />
               </div>
 
-              <div>
+              <div className='hidden'>
                 <Label className="mb-1">کد ملی</Label>
                 <Input name="melliCode" value={form.melliCode} onChange={handleChange} />
               </div>
