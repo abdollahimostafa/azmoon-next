@@ -25,7 +25,7 @@ type ExamData = {
   totalParticipants: number;
   topicStats: Record<string, { min: number; max: number; rank?: number }>;
   rank: number;
-  percentage?: number; // for total تراز
+  percentage?: number;
 };
 
 export default function Karnameh({
@@ -50,26 +50,38 @@ export default function Karnameh({
     return <p className="p-6 text-center text-gray-600">در حال بارگذاری...</p>;
 
   const topics = Array.from(new Set(exam.questions.map((q) => q.topic)));
+
   const answersMap: Record<string, string> = {};
   exam.userAnswers.forEach((ua) => (answersMap[ua.questionId] = ua.answer));
 
+  /** ✅ Konkoor scoring applied here */
   const topicStats = topics.map((topic) => {
     const qs = exam.questions.filter((q) => q.topic === topic);
     const total = qs.length;
+
     const correct = qs.filter((q) => answersMap[q.id] === q.correct).length;
     const empty = qs.filter(
       (q) => !answersMap[q.id] || answersMap[q.id] === "X"
     ).length;
     const wrong = total - correct - empty;
-    const percentage = total > 0 ? (correct / total) * 100 : 0;
 
-    const topicData = exam.topicStats?.[topic] ?? { min: 0, max: 0, rank: undefined };
+    // ✅ Konkoor scoring: +3 for correct, -1 for wrong
+    const rawScore = correct * 3 - wrong * 1;
+    const maxScore = total * 3;
+
+    // ✅ Allow negative percent
+    const percentage = maxScore > 0 ? (rawScore / maxScore) * 100 : 0;
+
+    const topicData =
+      exam.topicStats?.[topic] ?? { min: 0, max: 0, rank: undefined };
     const { min, max, rank } = topicData;
     const avg = (min + max) / 2;
 
-    // Compute topic تراز (normalized 2000-8000 scale)
+    // ✅ Taraz formula unchanged, just using new percentage
     const topicTaraz =
-      max > min ? 6000 + ((percentage - avg) / (max - min)) * 1500 : 6000;
+      max > min
+        ? 6000 + ((percentage - avg) / (max - min)) * 1500
+        : 6000 + (percentage / 100) * 1500;
 
     return {
       topic,
@@ -82,20 +94,15 @@ export default function Karnameh({
       max,
       avg,
       rank,
-      taraz: Math.max(2000, Math.min(9000, topicTaraz)), // clamp for realism
+      taraz: Math.max(2000, Math.min(9000, topicTaraz)),
     };
   });
 
-  // Compute total تراز based on all topics combined
+  /** ✅ Total Taraz now uses negative-based topic percentages */
   const totalPercentage =
     topicStats.reduce((sum, t) => sum + t.percentage, 0) / topicStats.length;
-  const totalTaraz =
-    6000 +
-    ((totalPercentage -
-      topicStats.reduce((sum, t) => sum + t.avg, 0) / topicStats.length) /
-      100) *
-      1500;
 
+const totalTaraz = topicStats.reduce((sum, t) => sum + t.taraz, 0) / topicStats.length;
   const persianDate = new Intl.DateTimeFormat("fa-IR", {
     year: "numeric",
     month: "long",

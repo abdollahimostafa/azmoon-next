@@ -131,7 +131,7 @@ export default function Page() {
                       <button
                         className="px-3 py-1 rounded-md text-sm bg-primary text-white hover:bg-primary/90"
                         onClick={() =>
-                          (window.location.href = `/exam/${exam.exam.id}`)
+                          (window.location.href = `/dashboard/myexams`)
                         }
                       >
                         شرکت در آزمون
