@@ -6,6 +6,7 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useEffect, useState } from "react"
@@ -30,6 +31,8 @@ type UserExam = {
 export default function Page() {
   const [exams, setExams] = useState<UserExam[]>([])
   const [loading, setLoading] = useState(true)
+const [openDialog, setOpenDialog] = useState(false)
+const [selectedExamId, setSelectedExamId] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchExams() {
@@ -115,8 +118,8 @@ export default function Page() {
     buttonLabel = "ادامه آزمون"
     canEnter = true
   } else {
-    buttonLabel = "اتمام مهلت"
-    canEnter = false
+    buttonLabel = "ورود به آزمون"
+    canEnter = true
   }
 
   return (
@@ -131,21 +134,55 @@ export default function Page() {
         </span>
       </div>
 
+<button
+  disabled={!canEnter}
+  className={`px-3 py-1 rounded-md text-sm transition-colors duration-200 ${
+    !canEnter
+      ? "bg-gray-500 text-white cursor-not-allowed"
+      : "bg-primary text-white hover:bg-primary/90"
+  }`}
+  onClick={() => {
+    if (!canEnter) return;
+
+    // Open confirm dialog
+    setSelectedExamId(exam.exam.id);
+    setOpenDialog(true);
+  }}
+>
+  {buttonLabel}
+</button>
+<Dialog open={openDialog} onOpenChange={setOpenDialog}>
+  <DialogContent className="text-right">
+    <DialogTitle/>
+    <h2 className="text-lg font-semibold">ورود به آزمون</h2>
+    <p className="text-sm text-gray-600 mt-2">
+      آیا از ورود به آزمون مطمئن هستید؟ زمان آزمون برای شما ثبت خواهد شد.
+    </p>
+    <p>شما تنها یک بار میتوانید  ازمون را شروع کنید</p>
+    <p>پس از شروع ازمون و اتمام زمان ازمون دیگر امکان شرکت مجدد را نخواهید داشت </p>
+
+    <div className="flex justify-end gap-2 mt-6">
       <button
-        disabled={!canEnter}
-        className={`px-3 py-1 rounded-md text-sm transition-colors duration-200 ${
-          !canEnter
-            ? "bg-gray-500 text-white cursor-not-allowed"
-            : "bg-primary text-white hover:bg-primary/90"
-        }`}
+        className="px-3 py-1 rounded-md bg-gray-300 text-black"
+        onClick={() => setOpenDialog(false)}
+      >
+        انصراف
+      </button>
+
+      <button
+        className="px-3 py-1 rounded-md bg-primary text-white"
         onClick={() => {
-          if (canEnter) {
-            window.location.href = `/exam/${exam.exam.id}`
+          if (selectedExamId) {
+            window.location.href = `/exam/${selectedExamId}`
           }
         }}
       >
-        {buttonLabel}
+        بله، وارد شو
       </button>
+    </div>
+  </DialogContent>
+</Dialog>
+
     </div>
   )
 })}

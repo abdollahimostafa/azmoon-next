@@ -67,7 +67,7 @@ const ua = data.exam.userAnswers?.find((a: UserAnswer) => a.questionId === q.id)
       if (data.exam.startedAt) {
         const elapsed = Math.floor((Date.now() - new Date(data.exam.startedAt).getTime()) / 1000)
         const remaining = Math.max(totalSeconds - elapsed, 0)
-        if (remaining === 0) router.push("/dashboard")
+        if (remaining === 0) router.push("/dashboard/examended")
         setTimeLeft(remaining)
       } else {
         setTimeLeft(totalSeconds)
@@ -82,7 +82,7 @@ const ua = data.exam.userAnswers?.find((a: UserAnswer) => a.questionId === q.id)
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer)
-          router.push("/dashboard")
+          router.push("/dashboard/examended")
           return 0
         }
         return prev - 1
