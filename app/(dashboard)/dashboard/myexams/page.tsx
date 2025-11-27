@@ -95,32 +95,38 @@ const [selectedExamId, setSelectedExamId] = useState<string | null>(null)
             ) : (
               <div className="space-y-4">
 {exams.map((exam) => {
-  const startTime = new Date(exam.exam.startDate).getTime()
-  const durationMs = exam.exam.duration * 60 * 1000
-  const now = Date.now()
-  const startedAt = exam.startedAt ? new Date(exam.startedAt).getTime() : null
-  const endTime = startedAt ? startedAt + durationMs : null
+const startTime = new Date(exam.exam.startDate).getTime();
+const durationMs = exam.exam.duration * 60 * 1000;
+const now = Date.now();
+const startedAt = exam.startedAt ? new Date(exam.startedAt).getTime() : null;
+const endTime = startedAt ? startedAt + durationMs : null;
 
-  let buttonLabel = ""
-  let canEnter = false
-  if (now < startTime) {
-    buttonLabel = "شروع نشده"
-    canEnter = false
-  } else if (!startedAt) {
-    if (exam.exam.status === "closed") {
-      buttonLabel = "شروع آزمون تمرینی"
-      canEnter = true
-    } else {
-      buttonLabel = "شروع آزمون آنلاین"
-      canEnter = true
-    }
-  } else if (endTime && now < endTime) {
-    buttonLabel = "ادامه آزمون"
-    canEnter = true
-  } else {
-    buttonLabel = "ورود به آزمون"
-    canEnter = true
-  }
+let buttonLabel = "";
+let canEnter = false;
+
+// 1. Exam not started yet
+if (now < startTime) {
+  buttonLabel = "شروع نشده";
+  canEnter = false;
+}
+
+// 2. User has NOT started yet → allow starting anytime after start time
+else if (!startedAt) {
+  buttonLabel = "شروع آزمون";
+  canEnter = true;
+}
+
+// 3. User started and is STILL inside allowed duration
+else if (endTime && now < endTime) {
+  buttonLabel = "ادامه آزمون";
+  canEnter = true;
+}
+
+// 4. User started, but time is over
+else {
+  buttonLabel = "مهلت تمام شد";
+  canEnter = false;
+}
 
   return (
     <div

@@ -92,32 +92,38 @@ export default function AnswerSheetPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 {exams.map((exam) => {
-  const startTime = new Date(exam.exam.startDate).getTime()
-  const durationMs = exam.exam.duration * 60 * 1000
-  const now = Date.now()
-  const startedAt = exam.startedAt ? new Date(exam.startedAt).getTime() : null
-  const endTime = startedAt ? startedAt + durationMs : null
+  const startTime = new Date(exam.exam.startDate).getTime();
+const durationMs = exam.exam.duration * 60 * 1000;
+const now = Date.now();
+const startedAt = exam.startedAt ? new Date(exam.startedAt).getTime() : null;
+const endTime = startedAt ? startedAt + durationMs : null;
 
-  let canSeeResult = false
-  let buttonLabel = ""
-  if (now < startTime) {
-    buttonLabel = "شروع نشده"
-    canSeeResult = false
+let canSeeResult = false;
+let buttonLabel = "";
 
-  }
-  else if (!startedAt) {
-    // user never started -> always not available
-    canSeeResult = false
-    buttonLabel = "نتایج هنوز در دسترس نیست"
-  } else if (endTime && now >= endTime) {
-    // user finished their duration
-    canSeeResult = true
-    buttonLabel = "📄 مشاهده کارنامه"
-  } else {
-    // exam still ongoing for this user
-    canSeeResult = false
-    buttonLabel = "نتایج هنوز در دسترس نیست"
-  }
+// 1. Exam not started yet
+if (now < startTime) {
+  buttonLabel = "شروع نشده";
+  canSeeResult = false;
+}
+
+// 2. User hasn't started the exam
+else if (!startedAt) {
+  buttonLabel = "نتایج هنوز در دسترس نیست";
+  canSeeResult = false;
+}
+
+// 3. User started but duration not finished yet
+else if (endTime && now < endTime) {
+  buttonLabel = "نتایج هنوز در دسترس نیست";
+  canSeeResult = false;
+}
+
+// 4. User started and time is finished → allow results
+else {
+  buttonLabel = "📄 مشاهده سوالات و نتایج";
+  canSeeResult = true;
+}
 
   return (
     <div

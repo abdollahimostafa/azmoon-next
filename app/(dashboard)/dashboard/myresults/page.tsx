@@ -92,37 +92,38 @@ export default function ResultsPage() {
             ) : (
               <div className="space-y-4">
 {exams.map((exam) => {
-    const startTime = new Date(exam.exam.startDate).getTime()
+ const startTime = new Date(exam.exam.startDate).getTime();
+const durationMs = exam.exam.duration * 60 * 1000;
+const now = Date.now();
+const startedAt = exam.startedAt ? new Date(exam.startedAt).getTime() : null;
+const endTime = startedAt ? startedAt + durationMs : null;
 
-  const durationMs = exam.exam.duration * 60 * 1000
-  const now = Date.now()
-  const startedAt = exam.startedAt ? new Date(exam.startedAt).getTime() : null
-  const endTime = startedAt ? startedAt + durationMs : null
+let canSeeResult = false;
+let buttonLabel = "";
 
-  const isClosed = exam.exam.status === "closed"
+// 1. Exam not started yet
+if (now < startTime) {
+  buttonLabel = "شروع نشده";
+  canSeeResult = false;
+}
 
-  let canSeeResult = false
-  let buttonLabel = ""
-  if (now < startTime) {
-    buttonLabel = "شروع نشده"
-    canSeeResult = false
+// 2. User hasn't started the exam
+else if (!startedAt) {
+  buttonLabel = "نتایج هنوز در دسترس نیست";
+  canSeeResult = false;
+}
 
-  }
-  else if (!startedAt) {
-    if (isClosed) {
-      canSeeResult = false
-      buttonLabel = " نتایج هنوز در دسترس نیست"
-    } else {
-      canSeeResult = false
-      buttonLabel = "نتایج هنوز در دسترس نیست"
-    }
-  } else if (endTime && now >= endTime) {
-    canSeeResult = true
-    buttonLabel = "📄 مشاهده سوالات و نتایج"
-  } else {
-    canSeeResult = false
-    buttonLabel = "نتایج هنوز در دسترس نیست"
-  }
+// 3. User started but duration not finished yet
+else if (endTime && now < endTime) {
+  buttonLabel = "نتایج هنوز در دسترس نیست";
+  canSeeResult = false;
+}
+
+// 4. User started and time is finished → allow results
+else {
+  buttonLabel = "📄 مشاهده سوالات و نتایج";
+  canSeeResult = true;
+}
 
   return (
     <div
